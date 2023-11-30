@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "StateActor.generated.h"
 
+class AMathGamemodeBase;
+
 UCLASS()
 class MATHPROJECT_API AStateActor : public AActor
 {
@@ -17,6 +19,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	AActor* player;
+
+	AMathGamemodeBase* gameMode;
 
 	UPROPERTY(EditAnywhere)
 	float detectAngle = 30.0f;
@@ -34,6 +38,7 @@ public:
 
 	bool bIsDetected = false;
 	bool bIsSuspicious = false;
+	bool bIsBeingWatched = false;
 
 protected:
 	// Called when the game starts or when spawned
@@ -43,4 +48,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void handleState(float DeltaTime);
+
+	void iSeeYou();
+
+	void checkupYourFriends();
+
+	TArray<AActor*> actorsToIgnore;
 };

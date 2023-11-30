@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
+#include "MathGamemodeBase.h"
 #include "StateActor.h"
 
 // Sets default values
@@ -17,13 +19,28 @@ void AStateActor::BeginPlay()
 {
 	Super::BeginPlay();
 	player = UGameplayStatics::GetPlayerPawn(this, 0);
-	
+
+	gameMode = Cast<AMathGamemodeBase>(UGameplayStatics::GetGameMode(this));
+
+	if (gameMode)
+	{
+		gameMode->addToList(this);
+	}
+	actorsToIgnore.Add(GetOwner());
 }
 
 // Called every frame
 void AStateActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	checkupYourFriends();
+	handleState(DeltaTime);
+
+}
+
+void AStateActor::handleState(float DeltaTime)
+{
 	if (player == nullptr)
 	{
 		return;
@@ -59,7 +76,7 @@ void AStateActor::Tick(float DeltaTime)
 
 		if (currentDetection < maxDetection)
 		{
-			currentDetection += (detectionRate * DeltaTime*10);
+			currentDetection += (detectionRate * DeltaTime * 10);
 		}
 
 	}
@@ -77,22 +94,55 @@ void AStateActor::Tick(float DeltaTime)
 			if (bIsSuspicious)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Must have been the wind!."));
-			bIsSuspicious = false;
+				bIsSuspicious = false;
 			}
 		}
 	}
-		//UE_LOG(LogTemp, Warning, TEXT("current detection %f?!!!"),currentDetection);
+	//UE_LOG(LogTemp, Warning, TEXT("current detection %f?!!!"),currentDetection);
 
-
-
-
-	if (angleInDegrees > killAngle && FVector::Distance(playerLocation,actorLocation) < killDistance)
+	if (angleInDegrees > killAngle && FVector::Distance(playerLocation, actorLocation) < killDistance && 
+		bIsBeingWatched == false)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Insert Mount and blade DEATH sound here"));
 
 	}
 
+	bIsBeingWatched = false;
+}
 
+void AStateActor::iSeeYou()
+{
+	bIsBeingWatched = true;
+}
+
+void AStateActor::checkupYourFriends()
+{
+	if (!gameMode) return;
+	TArray<AActor*> friendList;
+
+	friendList = gameMode->getTheList();
+
+	FHitResult hit;
+	//I'm not your friend buddy!!??
+	for (AActor* buddy : friendList)
+	{
+		if (buddy == this) continue;
+	
+		FVector actorLocation = this->GetActorLocation();
+		FVector friendLocation = buddy->GetActorLocation();
+		
+		UKismetSystemLibrary::LineTraceSingle(GetWorld(), actorLocation, friendLocation, ETraceTypeQuery::TraceTypeQuery1,
+			true, actorsToIgnore, EDrawDebugTrace::ForOneFrame, hit ,true);
+		AStateActor* guy;
+		if (hit.bBlockingHit && IsValid(hit.GetActor()))
+		{
+			if (Cast<AStateActor>(hit.GetActor()))
+			{
+				guy = Cast<AStateActor>(hit.GetActor());
+				guy->iSeeYou();
+			}
+		}
+	}
 
 }
 
