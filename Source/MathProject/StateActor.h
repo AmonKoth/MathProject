@@ -25,6 +25,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	float killAngle = 135.0f;
 
+	UPROPERTY(EditAnywhere)
+	float detectionRate = 5.0f;
+	UPROPERTY(EditAnywhere)
+	float maxDetection = 100.0f;
+
+	float currentDetection = 0.0f;
+
+	bool bIsDetected = false;
+	bool bIsSuspicious = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

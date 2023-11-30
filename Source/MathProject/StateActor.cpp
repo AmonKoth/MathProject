@@ -42,13 +42,56 @@ void AStateActor::Tick(float DeltaTime)
 
 	if (angleInDegrees < detectAngle)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OIOI YOU THERE!"));
+		if (bIsSuspicious == false)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("HUH?!!!"));
+			bIsSuspicious = true;
+		}
+		if (currentDetection >= maxDetection)
+		{
+			if (bIsDetected == false)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("OIOI YOU THERE!"));
+				bIsDetected = true;
+			}
+			currentDetection = maxDetection;
+		}
+
+		if (currentDetection < maxDetection)
+		{
+			currentDetection += (detectionRate * DeltaTime*10);
+		}
+
 	}
-	else if (angleInDegrees > killAngle && FVector::Distance(playerLocation,actorLocation) < killDistance)
+	else
+	{
+		bIsDetected = false;
+		if (currentDetection > 0)
+		{
+			currentDetection -= (detectionRate * DeltaTime * 10);
+		}
+		if (currentDetection <= 0)
+		{
+			currentDetection = 0;
+			bIsDetected = false;
+			if (bIsSuspicious)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Must have been the wind!."));
+			bIsSuspicious = false;
+			}
+		}
+	}
+		//UE_LOG(LogTemp, Warning, TEXT("current detection %f?!!!"),currentDetection);
+
+
+
+
+	if (angleInDegrees > killAngle && FVector::Distance(playerLocation,actorLocation) < killDistance)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Insert Mount and blade DEATH sound here"));
 
 	}
+
 
 
 }
