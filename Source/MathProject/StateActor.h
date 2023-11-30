@@ -40,6 +40,9 @@ public:
 	bool bIsSuspicious = false;
 	bool bIsBeingWatched = false;
 
+	//I could not really understand this part (I can create a noisemap using shader graph though)
+	float noise = 1.0f;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

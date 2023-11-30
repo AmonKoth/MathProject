@@ -34,6 +34,11 @@ void AStateActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float noiseToBeAssigned = FMath::Abs(FMath::PerlinNoise1D(DeltaTime));
+	if (noiseToBeAssigned != 0)
+	{
+		noise = noiseToBeAssigned;
+	}
 	checkupYourFriends();
 	handleState(DeltaTime);
 
@@ -76,7 +81,7 @@ void AStateActor::handleState(float DeltaTime)
 
 		if (currentDetection < maxDetection)
 		{
-			currentDetection += (detectionRate * DeltaTime * 10);
+			currentDetection += (detectionRate * DeltaTime * 10 * noise);
 		}
 
 	}
@@ -98,7 +103,7 @@ void AStateActor::handleState(float DeltaTime)
 			}
 		}
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("current detection %f?!!!"),currentDetection);
+	UE_LOG(LogTemp, Warning, TEXT("current detection %f?!!!"),currentDetection);
 
 	if (angleInDegrees > killAngle && FVector::Distance(playerLocation, actorLocation) < killDistance && 
 		bIsBeingWatched == false)
